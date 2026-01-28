@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Sala 01</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0056b3;
+            --danger-red: #dc2626; /* Vermelho sangue corporativo */
+            --bg-dark: #0f172a;
+            --text-white: #ffffff;
+            --text-gray: #6b7280;
+            --glass: rgba(255, 255, 255, 0.95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background: #f3f4f6;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* --- 1. ESTRUTURA DA AGENDA --- */
+        .container {
+            width: 90%; max-width: 1200px; height: 85vh;
+            background: var(--glass);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            display: grid; grid-template-columns: 1fr 2fr;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.8);
+            z-index: 1;
+            transition: filter 0.5s ease, transform 0.5s ease;
+        }
+
+        .status-panel {
+            background: var(--primary-blue); color: white; padding: 40px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+        
+        .status-panel::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        /* Logo da barra lateral (agenda normal) */
+        .sidebar-logo { max-width: 180px; max-height: 80px; object-fit: contain; margin-bottom: 20px; z-index: 2; position: relative;}
+        
+        .room-info h1 { font-size: 3.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; letter-spacing: -2px; }
+        .room-info p { font-size: 1.1rem; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase; }
+        
+        .clock { font-size: 4.5rem; font-weight: 300; letter-spacing: -3px; line-height: 1; }
+        .date { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
+
+        .schedule-panel { padding: 40px; background: white; overflow-y: auto; }
+        .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f3f4f6; padding-bottom: 20px; }
+        .schedule-header h2 { font-size: 1.8rem; color: #1f2937; font-weight: 700; letter-spacing: -1px; }
+
+        .btn-add {
+            background: var(--primary-blue); color: white; border: none; padding: 12px 25px;
+            border-radius: 50px; cursor: pointer; font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); transition: transform 0.2s;
+        }
+        .btn-add:hover { transform: translateY(-2px); }
+
+        .reservation-card {
+            display: flex; align-items: center; background: white;
+            border-left: 6px solid var(--primary-blue);
+            padding: 25px; margin-bottom: 20px; border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+            transition: all 0.3s ease; position: relative;
+        }
+
+        .time-slot { font-weight: 800; font-size: 1.3rem; color: var(--primary-blue); min-width: 130px; display: flex; flex-direction: column; }
+        .time-slot span { font-size: 0.8rem; color: #9ca3af; font-weight: 500; }
+        
+        .meeting-title { font-size: 1.2rem; font-weight: 700; color: #1f2937; margin-bottom: 5px; }
+        .organizer { display: flex; align-items: center; font-size: 0.9rem; color: #6b7280; font-weight: 500; }
+        .avatar { width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; margin-right: 10px; display: flex; justify-content: center; align-items: center; font-size: 0.75rem; font-weight: 700; }
+
+        .tag { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-left: auto; text-transform: uppercase; }
+        .tag.upcoming { background: #eff6ff; color: var(--primary-blue); }
+        .tag.ongoing { background: #fef2f2; color: var(--danger-red); }
+
+        /* --- 2. O MODO OCUPADO (LOCKDOWN OVERLAY) --- */
+        #lockdownOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; pointer-events: none; transform: scale(1.1);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden; background: #000;
+        }
+
+        body.is-busy #lockdownOverlay { opacity: 1; pointer-events: all; transform: scale(1); }
+        body.is-busy .container { filter: blur(20px) brightness(0.5); transform: scale(0.95); }
+
+        .lockdown-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            /* ATENÇÃO: Para a Sala 2, mude esta URL para a imagem da ponte */
+            background-image: url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            opacity: 0.4; filter: grayscale(100%) contrast(1.2); z-index: 0;
+            animation: slowZoom 20s infinite alternate;
+        }
+
+        @keyframes slowZoom { from{transform: scale(1);} to{transform: scale(1.1);} }
+
+        .lockdown-gradient {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(220, 38, 38, 0.4) 0%, rgba(127, 29, 29, 0.9) 100%);
+            z-index: 1; mix-blend-mode: multiply;
+        }
+
+        /* --- NOVA LOGO DO LOCKDOWN --- */
+        .lockdown-logo {
+            position: absolute;
+            top: 50px; /* Distância do topo */
+            left: 50%;
+            transform: translateX(-50%); /* Centraliza */
+            height: 80px; /* Tamanho um pouco maior para destaque */
+            z-index: 20;
+            /* Filtro para deixar branca e com brilho dramático */
+            filter: brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,0.6));
+            opacity: 0.9;
+        }
+
+        .lockdown-content {
+            position: relative; z-index: 10;
+            text-align: center; color: white;
+            border: 4px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
+            padding: 60px 100px; border-radius: 4px;
+            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5);
+            animation: pulseBorder 2s infinite;
+        }
+
+        @keyframes pulseBorder {
+            0% { border-color: rgba(220, 38, 38, 0.3); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
+            50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 80px rgba(220, 38, 38, 0.6); }
+            100% { border-color: rgba(220, 38, 38, 0.3); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
+        }
+
+        .lockdown-status { font-size: 6rem; font-weight: 900; letter-spacing: -2px; text-transform: uppercase; margin: 0; line-height: 1; color: white; text-shadow: 0 5px 30px rgba(0,0,0,0.8); }
+        .lockdown-sub { font-size: 1.5rem; font-weight: 400; letter-spacing: 5px; text-transform: uppercase; color: #fca5a5; margin-bottom: 40px; display: block; margin-top: 10px; }
+
+        .current-meeting-box { border-top: 1px solid rgba(255,255,255,0.3); padding-top: 30px; margin-top: 30px; }
+        .meeting-time-big { font-size: 3rem; font-weight: 700; color: white; }
+        .meeting-title-big { font-size: 1.8rem; color: #e5e7eb; margin-top: 10px; font-weight: 300; }
+        
+        /* Modal & Helpers */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .modal-card { background: white; padding: 30px; border-radius: 20px; width: 400px; }
+        .form-group { margin-bottom: 15px; } .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
+        .row { display: flex; gap: 10px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div id="lockdownOverlay">
+        <div class="lockdown-bg"></div>
+        <div class="lockdown-gradient"></div>
+        
+        <img src="https://globalsrv.com.br/wp-content/uploads/2023/02/Logo_60px_white.png" alt="Company Logo" class="lockdown-logo">
+
+        <div class="lockdown-content">
+            <span class="lockdown-sub">Status da Sala</span>
+            <h1 class="lockdown-status">OCUPADO</h1>
+            
+            <div class="current-meeting-box">
+                <div class="meeting-time-big" id="lockTime">00:00 - 00:00</div>
+                <div class="meeting-title-big" id="lockTitle">Carregando...</div>
+            </div>
+            
+            <div style="margin-top: 40px; font-size: 0.9rem; opacity: 0.7;">
+                NÃO PERTURBE
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-card">
+                <h3 style="margin-bottom:20px; color:#333;">Nova Reserva</h3>
+                <div class="form-group"><label>Título</label><input type="text" id="inputTitle"></div>
+                <div class="form-group"><label>Organizador</label><input type="text" id="inputOrganizer"></div>
+                <div class="row">
+                    <div class="form-group"><label>Início (HH:MM)</label><input type="text" id="inputStart" maxlength="5" oninput="formatTime(this)"></div>
+                    <div class="form-group"><label>Fim (HH:MM)</label><input type="text" id="inputEnd" maxlength="5" oninput="formatTime(this)"></div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn-add" style="background:#ccc; color:black;" onclick="closeModal()">Cancelar</button>
+                    <button class="btn-add" onclick="saveReservation()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-panel">
+            <img src="https://globalsrv.com.br/wp-content/uploads/2023/02/Logo_60px_white.png" alt="Logo" class="sidebar-logo">
+            
+            <div class="room-info">
+                <h1>SALA 01</h1>
+                <p>Engenharia & Obras</p>
+            </div>
+
+            <div class="current-time">
+                <div class="clock" id="clock">00:00</div>
+                <div class="date" id="date">...</div>
+            </div>
+        </div>
+
+        <div class="schedule-panel">
+            <div class="schedule-header">
+                <h2>Agenda do Dia</h2>
+                <button class="btn-add" onclick="openModal()">+ Nova Reserva</button>
+            </div>
+
+            <div id="reservation-list">
+                <div class="reservation-card">
+                    <div class="time-slot">08:00 <span>até 09:00</span></div>
+                    <div class="meeting-details">
+                        <div class="meeting-title">Daily Obra</div>
+                        <div class="organizer"><div class="avatar">E</div>Equipe</div>
+                    </div>
+                    <span class="tag upcoming">CONFIRMADO</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let lastAlertMinute = -1;
+
+        function playAlarm() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine'; 
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 30);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 30);
+        }
+
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}`;
+            
+            const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+            const dStr = now.toLocaleDateString('pt-BR', opts);
+            document.getElementById('date').textContent = dStr.charAt(0).toUpperCase() + dStr.slice(1);
+            
+            checkStatus(hours, minutes);
+        }
+
+        function checkStatus(h, m) {
+            const nowMins = (parseInt(h) * 60) + parseInt(m);
+            let isBusy = false;
+            let currentMeetingTitle = "";
+            let currentMeetingTime = "";
+
+            const cards = document.querySelectorAll('.reservation-card');
+            
+            cards.forEach(card => {
+                const timeText = card.querySelector('.time-slot').innerText;
+                const times = timeText.match(/(\d{2}:\d{2})/g);
+                
+                if (times && times.length >= 2) {
+                    const startMins = toMins(times[0]);
+                    const endMins = toMins(times[1]);
+                    const tag = card.querySelector('.tag');
+                    const title = card.querySelector('.meeting-title').innerText;
+
+                    if (nowMins >= startMins && nowMins < endMins) {
+                        isBusy = true;
+                        currentMeetingTitle = title;
+                        currentMeetingTime = `${times[0]} - ${times[1]}`;
+                        card.style.borderLeftColor = "var(--danger-red)";
+                        card.style.background = "#fff1f2";
+                        tag.className = "tag ongoing";
+                        tag.textContent = "EM ANDAMENTO";
+                    } 
+                    else if (nowMins === endMins && lastAlertMinute !== nowMins) {
+                         playAlarm();
+                         lastAlertMinute = nowMins;
+                    }
+                    else {
+                        card.style.borderLeftColor = "var(--primary-blue)";
+                        card.style.background = "white";
+                        if(nowMins >= endMins) {
+                            tag.className = "tag"; tag.textContent = "FINALIZADO"; 
+                            tag.style.background = "#f3f4f6"; tag.style.color="#9ca3af";
+                        } else {
+                            tag.className = "tag upcoming"; tag.textContent = "CONFIRMADO";
+                        }
+                    }
+                }
+            });
+
+            toggleLockdownMode(isBusy, currentMeetingTitle, currentMeetingTime);
+        }
+
+        function toggleLockdownMode(active, title, time) {
+            const body = document.body;
+            if (active) {
+                body.classList.add('is-busy');
+                document.getElementById('lockTitle').textContent = title;
+                document.getElementById('lockTime').textContent = time;
+            } else {
+                body.classList.remove('is-busy');
+            }
+        }
+
+        function toMins(timeStr) {
+            const [hh, mm] = timeStr.split(':');
+            return (parseInt(hh)*60) + parseInt(mm);
+        }
+
+        function openModal() { document.getElementById('modalOverlay').classList.add('active'); if(audioCtx.state === 'suspended') audioCtx.resume(); }
+        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
+        
+        function formatTime(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (v.length > 4) v = v.slice(0, 4);
+            if (v.length > 2) v = v.slice(0, 2) + ':' + v.slice(2);
+            input.value = v;
+        }
+
+        function saveReservation() {
+            const title = document.getElementById('inputTitle').value;
+            const org = document.getElementById('inputOrganizer').value;
+            const start = document.getElementById('inputStart').value;
+            const end = document.getElementById('inputEnd').value;
+
+            if(!title || !org || !start || !end) return alert("Preencha tudo!");
+            
+            const html = `
+            <div class="reservation-card">
+                <div class="time-slot">${start} <span>até ${end}</span></div>
+                <div class="meeting-details">
+                    <div class="meeting-title">${title}</div>
+                    <div class="organizer"><div class="avatar">${org[0]}</div>${org}</div>
+                </div>
+                <span class="tag upcoming">CONFIRMADO</span>
+            </div>`;
+            
+            document.getElementById('reservation-list').insertAdjacentHTML('beforeend', html);
+            closeModal();
+            const now = new Date();
+            checkStatus(String(now.getHours()), String(now.getMinutes()));
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+
+    <script>
+        let idleTime = 0;
+        // ATENÇÃO: Mude para 60 ou 120 segundos em produção
+        const idleLimit = 30; 
+
+        function resetTimer() { idleTime = 0; }
+
+        document.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onmousedown = resetTimer;
+        document.ontouchstart = resetTimer;
+        document.onclick = resetTimer;
+        document.onkeypress = resetTimer;
+
+        setInterval(function() {
+            idleTime++;
+            if (idleTime >= idleLimit) {
+                const isRoomBusy = document.body.classList.contains('is-busy');
+                if (isRoomBusy) {
+                    console.log("Inativo, mas sala ocupada. Mantendo Lockdown.");
+                } else {
+                    console.log("Inativo e sala livre. Voltando para Home.");
+                    window.location.href = "index.html"; 
+                }
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

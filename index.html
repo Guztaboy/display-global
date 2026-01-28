@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engenharia Hub - Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            /* Paleta Corporativa */
+            --primary-blue: #0056b3;
+            --text-white: #ffffff;
+            --bg-dark: #0f172a; /* Azul-acinzentado muito escuro */
+            --overlay-gradient: linear-gradient(to bottom, rgba(15, 23, 42, 0.4) 0%, rgba(15, 23, 42, 0.8) 100%);
+            --transition-speed: 0.6s;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-dark);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+        }
+
+        /* --- LOGO --- */
+        .brand-logo {
+            position: absolute; top: 40px; left: 50%;
+            z-index: 20; pointer-events: none;
+            display: flex; justify-content: center;
+            transform: translateX(-50%);
+        }
+        
+        .brand-logo img {
+            height: 70px;
+            filter: brightness(0) invert(1) drop-shadow(0 4px 15px rgba(0,0,0,0.8));
+            animation: logoEntrance 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes logoEntrance {
+            0% { opacity: 0; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- CONTAINER PRINCIPAL --- */
+        .split-screen { display: flex; width: 100%; height: 100vh; }
+
+        /* --- CARD DA SALA --- */
+        .room-panel {
+            position: relative; flex: 1; height: 100%;
+            transition: flex var(--transition-speed) cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border-right: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .room-panel:hover { flex: 3; }
+        
+        /* Efeito no lado não focado */
+        .split-screen:hover .room-panel:not(:hover) { 
+            filter: grayscale(90%) brightness(0.4);
+        }
+
+        /* --- IMAGEM DE FUNDO (Ken Burns Effect) --- */
+        .panel-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover; background-position: center;
+            /* Animação de zoom lento constante para dar vida */
+            animation: kenBurns 20s infinite alternate ease-in-out;
+            transition: transform 0.8s ease;
+        }
+
+        @keyframes kenBurns {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+
+        /* Imagem Sala 1: Maquinário Pesado / Obra */
+        .room-1 .panel-bg {
+            background-image: url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop');
+        }
+
+        /* Imagem Sala 2: Ponte Estaiada / Engenharia Civil */
+        .room-2 .panel-bg {
+            background-image: url('https://images.unsplash.com/photo-1535732759880-bbd5c7265e3f?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+        }
+
+        /* --- OVERLAY --- */
+        .overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay-gradient);
+            z-index: 1; opacity: 0.8; transition: opacity 0.5s;
+        }
+        
+        /* Clareia um pouco a imagem ao focar */
+        .room-panel:hover .overlay { opacity: 0.5; }
+
+        /* --- CONTEÚDO --- */
+        .content {
+            position: relative; z-index: 2; text-align: center; color: var(--text-white);
+            transform: translateY(20px); transition: all 0.5s ease; width: 100%; padding: 0 20px;
+        }
+        
+        .room-panel:hover .content { transform: translateY(0); }
+
+        h2 {
+            font-family: 'Inter', sans-serif; font-weight: 900;
+            font-size: 5vw; text-transform: uppercase; letter-spacing: -2px;
+            margin-bottom: 15px; line-height: 1;
+            text-shadow: 0 5px 25px rgba(0,0,0,0.8);
+        }
+
+        p {
+            font-size: 1rem; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+            color: var(--primary-blue); background: rgba(0, 0, 0, 0.6);
+            display: inline-block; padding: 10px 20px; border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 25px; backdrop-filter: blur(4px);
+        }
+
+        /* --- BOTÃO --- */
+        .btn-enter {
+            display: inline-block; padding: 18px 50px;
+            background: var(--primary-blue); color: white;
+            text-transform: uppercase; font-weight: 700; letter-spacing: 1px; font-size: 0.9rem;
+            cursor: pointer; text-decoration: none; border: none;
+            opacity: 0; transform: translateY(40px);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .btn-enter:hover { background: #004494; transform: translateY(35px) scale(1.05); }
+        .room-panel:hover .btn-enter { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .split-screen { flex-direction: column; }
+            h2 { font-size: 12vw; }
+            .brand-logo img { height: 50px; top: 25px; }
+            .room-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.2); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo">
+        <img src="https://globalsrv.com.br/wp-content/uploads/2023/02/Logo_60px_white.png" alt="Company Logo">
+    </div>
+
+    <div class="split-screen">
+        
+        <div class="room-panel room-1" onclick="goToRoom(1)">
+            <div class="panel-bg"></div>
+            <div class="overlay"></div>
+            
+            <div class="content">
+                <p>Sala Principal </p>
+                <h2>SALA 01</h2>
+                <div class="btn-enter">Acessar Agenda</div>
+            </div>
+        </div>
+
+        <div class="room-panel room-2" onclick="goToRoom(2)">
+            <div class="panel-bg"></div>
+            <div class="overlay"></div>
+
+            <div class="content">
+                <p>Sala Secundária </p>
+                <h2>SALA 02</h2>
+                <div class="btn-enter">Acessar Agenda</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function goToRoom(roomNumber) {
+            // Efeito de Flash/Transição
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = '0'; flash.style.left = '0';
+            flash.style.width = '100%'; flash.style.height = '100%';
+            flash.style.background = 'white';
+            flash.style.zIndex = '9999';
+            flash.style.opacity = '0';
+            flash.style.transition = 'opacity 0.3s ease';
+            document.body.appendChild(flash);
+
+            // Trigger animation
+            setTimeout(() => { flash.style.opacity = '1'; }, 10);
+
+            setTimeout(() => {
+                if(roomNumber === 1) {
+                    // Coloque aqui o nome do arquivo da sala que criamos antes
+                    window.location.href = "agenda.html"; 
+                } else {
+                    alert("A Sala 02 ainda não foi conectada.");
+                    // window.location.href = "agenda-sala2.html";
+                    flash.style.opacity = '0';
+                    setTimeout(() => flash.remove(), 300);
+                }
+            }, 300);
+        }
+    </script>
+</body>
+</html>
