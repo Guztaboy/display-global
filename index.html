@@ -191,13 +191,11 @@
 
             setTimeout(() => {
                 if(roomNumber === 1) {
-                    // Coloque aqui o nome do arquivo da sala que criamos antes
-                    window.location.href = "agenda.html"; 
+                    // Redireciona para a Sala 1
+                    window.location.href = "agenda1.html";
                 } else {
-                    alert("A Sala 02 ainda não foi conectada.");
-                    // window.location.href = "agenda-sala2.html";
-                    flash.style.opacity = '0';
-                    setTimeout(() => flash.remove(), 300);
+                    // Redireciona para a Sala 2 (Agora funcionando)
+                    window.location.href = "agenda2.html";
                 }
             }, 300);
         }
