@@ -1,188 +1,192 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Sala 01</title>
+    <title>Agenda - Sala 01</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        /* --- CSS VISUAL (Mantido igual) --- */
-        :root {
-            --primary-blue: #0056b3;
-            --danger-red: #dc2626;
-            --bg-dark: #0f172a;
-            --text-white: #ffffff;
-            --text-gray: #6b7280;
-            --glass: rgba(255, 255, 255, 0.95);
-        }
-
+        :root { --primary-blue: #0056b3; --danger-red: #b91c1c; --bg-dark: #0f172a; --glass: rgba(255, 255, 255, 0.90); }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
-            background: #f3f4f6;
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            overflow: hidden; position: relative;
+            background: #f3f4f6; height: 100vh; display: flex;
+            justify-content: center; align-items: center; overflow: hidden;
+            transition: all 0.8s ease; position: relative;
         }
 
-        /* Container Principal */
+        /* --- VISUAL LOCKDOWN --- */
+        body.is-busy::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            filter: grayscale(100%) contrast(1.2) brightness(0.4); z-index: 0;
+            opacity: 0; transition: opacity 0.8s ease;
+        }
+        body.is-busy::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(153, 27, 27, 0.6) 0%, rgba(0, 0, 0, 0.9) 100%);
+            z-index: 0; opacity: 0; transition: opacity 0.8s ease;
+        }
+        body.is-busy::before, body.is-busy::after { opacity: 1; }
+
+        /* Container */
         .container {
             width: 90%; max-width: 1200px; height: 85vh;
             background: var(--glass); border-radius: 30px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
-            display: grid; grid-template-columns: 1fr 2fr;
-            overflow: hidden; border: 1px solid rgba(255,255,255,0.8);
-            z-index: 1; transition: filter 0.5s ease;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            display: grid; grid-template-columns: 1.2fr 1.8fr;
+            overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative; z-index: 10; transition: all 0.5s ease;
         }
+        body.is-busy .container { box-shadow: 0 0 50px rgba(220, 38, 38, 0.6); border: 2px solid rgba(220, 38, 38, 0.3); }
 
-        /* Sidebar Azul */
+        /* Sidebar */
         .status-panel {
             background: var(--primary-blue); color: white; padding: 40px;
             display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; overflow: hidden;
+            position: relative; overflow: hidden; transition: background 0.6s ease;
         }
+        body.is-busy .status-panel { background: #991b1b; }
+        
         .status-panel::after {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%); pointer-events: none;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%); pointer-events: none;
         }
-        .sidebar-logo { max-width: 180px; max-height: 80px; object-fit: contain; margin-bottom: 20px; z-index: 2; position: relative;}
+
+        .sidebar-logo { max-width: 180px; max-height: 80px; object-fit: contain; margin-bottom: 20px; z-index: 2; }
         .room-info h1 { font-size: 3.5rem; font-weight: 800; line-height: 1; margin-bottom: 5px; letter-spacing: -2px; }
-        .room-info p { font-size: 1.1rem; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase; }
+        .room-info p { font-size: 1.1rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; }
+
+        .room-info h1.status-ocupado { font-size: 4rem; text-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .room-info p.meeting-now {
+            background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px;
+            display: inline-block; margin-top: 10px; border-left: 3px solid rgba(255,255,255,0.5);
+        }
+
         .clock { font-size: 4.5rem; font-weight: 300; letter-spacing: -3px; line-height: 1; }
         .date { font-size: 1.1rem; opacity: 0.9; margin-top: 5px; }
 
-        /* Lista de Agenda */
-        .schedule-panel { padding: 40px; background: white; overflow-y: auto; }
-        .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #f3f4f6; padding-bottom: 20px; }
-        .schedule-header h2 { font-size: 1.8rem; color: #1f2937; font-weight: 700; letter-spacing: -1px; }
-        .btn-add {
-            background: var(--primary-blue); color: white; border: none; padding: 12px 25px;
-            border-radius: 50px; cursor: pointer; font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 86, 179, 0.2); transition: transform 0.2s;
+        /* Agenda Panel */
+        .schedule-panel { padding: 40px; background: white; overflow-y: auto; position: relative; }
+        .schedule-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 30px; border-bottom: 2px solid #f3f4f6; padding-bottom: 20px;
         }
-        .btn-add:hover { transform: translateY(-2px); }
+        .schedule-header h2 { font-size: 1.8rem; color: #1f2937; font-weight: 700; }
+        
+        .header-actions { display: flex; gap: 10px; }
+
+        .btn {
+            text-decoration: none; font-weight: 600; padding: 10px 20px; border-radius: 12px;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            border: none; cursor: pointer;
+        }
+
+        .btn-voltar { background: #f3f4f6; color: #64748b; }
+        .btn-voltar:hover { background: #e2e8f0; }
+
+        .btn-reservar { background: var(--primary-blue); color: white; box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3); }
+        .btn-reservar:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 86, 179, 0.4); }
+        .btn-reservar:disabled { background: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; }
 
         /* Cards */
         .reservation-card {
             display: flex; align-items: center; background: white;
-            border-left: 6px solid var(--primary-blue);
-            padding: 25px; margin-bottom: 20px; border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: relative;
+            border-left: 6px solid var(--primary-blue); padding: 25px;
+            margin-bottom: 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            animation: slideIn 0.5s ease; transition: all 0.3s ease;
         }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
         .time-slot { font-weight: 800; font-size: 1.3rem; color: var(--primary-blue); min-width: 130px; display: flex; flex-direction: column; }
+        
+        .reservation-card.active-card {
+            background: #fff1f2; border-left-color: var(--danger-red);
+            box-shadow: 0 10px 30px rgba(220, 38, 38, 0.15); transform: scale(1.02);
+        }
+        .reservation-card.active-card .time-slot { color: var(--danger-red); }
+        
         .time-slot span { font-size: 0.8rem; color: #9ca3af; font-weight: 500; }
         .meeting-title { font-size: 1.2rem; font-weight: 700; color: #1f2937; margin-bottom: 5px; }
         .organizer { display: flex; align-items: center; font-size: 0.9rem; color: #6b7280; font-weight: 500; }
         .avatar { width: 28px; height: 28px; background: #e5e7eb; border-radius: 50%; margin-right: 10px; display: flex; justify-content: center; align-items: center; font-size: 0.75rem; font-weight: 700; }
-        .tag { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.5px; margin-left: auto; text-transform: uppercase; }
+        .tag { padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; margin-left: auto; text-transform: uppercase; }
         .tag.upcoming { background: #eff6ff; color: var(--primary-blue); }
         .tag.ongoing { background: #fef2f2; color: var(--danger-red); }
 
-        /* Botão de Excluir (X) */
-        .btn-delete {
-            position: absolute; top: 10px; right: 10px; border: none; background: transparent; 
-            color: #ccc; font-weight: bold; cursor: pointer; font-size: 1rem;
-        }
-        .btn-delete:hover { color: red; }
-
-        /* --- LOCKDOWN RED SCREEN --- */
-        #lockdownOverlay {
+        /* --- MODAL DE RESERVA --- */
+        .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; pointer-events: none; transform: scale(1.1);
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow: hidden; background: #000;
+            background: rgba(0,0,0,0.6); z-index: 100;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(5px); animation: fadeIn 0.3s;
         }
-        body.is-busy #lockdownOverlay { opacity: 1; pointer-events: all; transform: scale(1); }
-        body.is-busy .container { filter: blur(20px) brightness(0.5); transform: scale(0.95); }
-
-        .lockdown-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=2070&auto=format&fit=crop');
-            background-size: cover; background-position: center;
-            opacity: 0.4; filter: grayscale(100%) contrast(1.2); z-index: 0;
-            animation: slowZoom 20s infinite alternate;
+        .modal {
+            background: white; width: 500px; padding: 40px; border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center;
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        @keyframes slowZoom { from{transform: scale(1);} to{transform: scale(1.1);} }
-
-        .lockdown-gradient {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(220, 38, 38, 0.4) 0%, rgba(127, 29, 29, 0.9) 100%);
-            z-index: 1; mix-blend-mode: multiply;
+        .modal h2 { color: var(--primary-blue); margin-bottom: 10px; font-size: 2rem; }
+        .modal p { color: #64748b; margin-bottom: 30px; }
+        
+        .duration-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .duration-btn {
+            padding: 15px; border: 2px solid #e2e8f0; background: white; border-radius: 15px;
+            font-weight: 700; color: #64748b; cursor: pointer; transition: all 0.2s;
         }
+        .duration-btn:hover { border-color: var(--primary-blue); color: var(--primary-blue); }
+        .duration-btn.selected { background: var(--primary-blue); color: white; border-color: var(--primary-blue); box-shadow: 0 5px 15px rgba(0, 86, 179, 0.3); }
 
-        .lockdown-logo {
-            position: absolute; top: 50px; left: 50%; transform: translateX(-50%);
-            height: 80px; z-index: 20;
-            filter: brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,0.6)); opacity: 0.9;
+        .input-title {
+            width: 100%; padding: 15px; border: 2px solid #e2e8f0; border-radius: 15px;
+            font-size: 1rem; margin-bottom: 30px; outline: none; font-family: 'Inter', sans-serif;
         }
+        .input-title:focus { border-color: var(--primary-blue); }
 
-        .lockdown-content {
-            position: relative; z-index: 10; text-align: center; color: white;
-            border: 4px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(10px); padding: 60px 100px; border-radius: 4px;
-            box-shadow: 0 0 50px rgba(220, 38, 38, 0.5); animation: pulseBorder 2s infinite;
-        }
-        @keyframes pulseBorder {
-            0% { border-color: rgba(220, 38, 38, 0.3); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
-            50% { border-color: rgba(220, 38, 38, 1); box-shadow: 0 0 80px rgba(220, 38, 38, 0.6); }
-            100% { border-color: rgba(220, 38, 38, 0.3); box-shadow: 0 0 30px rgba(220, 38, 38, 0.2); }
-        }
+        .modal-actions { display: flex; gap: 15px; }
+        .btn-confirm { flex: 1; background: var(--primary-blue); color: white; justify-content: center; }
+        .btn-cancel { flex: 1; background: #f1f5f9; color: #64748b; justify-content: center; }
 
-        .lockdown-status { font-size: 6rem; font-weight: 900; letter-spacing: -2px; text-transform: uppercase; margin: 0; line-height: 1; color: white; text-shadow: 0 5px 30px rgba(0,0,0,0.8); }
-        .lockdown-sub { font-size: 1.5rem; font-weight: 400; letter-spacing: 5px; text-transform: uppercase; color: #fca5a5; margin-bottom: 40px; display: block; margin-top: 10px; }
-        .current-meeting-box { border-top: 1px solid rgba(255,255,255,0.3); padding-top: 30px; margin-top: 30px; }
-        .meeting-time-big { font-size: 3rem; font-weight: 700; color: white; }
-        .meeting-title-big { font-size: 1.8rem; color: #e5e7eb; margin-top: 10px; font-weight: 300; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-overlay.active { display: flex; }
-        .modal-card { background: white; padding: 30px; border-radius: 20px; width: 400px; }
-        .form-group { margin-bottom: 15px; } .form-group input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; }
-        .row { display: flex; gap: 10px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     </style>
 </head>
-<body>
 
-    <div id="lockdownOverlay">
-        <div class="lockdown-bg"></div>
-        <div class="lockdown-gradient"></div>
-        <img src="https://globalsrv.com.br/wp-content/uploads/2023/02/Logo_60px_white.png" alt="Logo" class="lockdown-logo">
-        <div class="lockdown-content">
-            <span class="lockdown-sub">Status da Sala</span>
-            <h1 class="lockdown-status">OCUPADO</h1>
-            <div class="current-meeting-box">
-                <div class="meeting-time-big" id="lockTime">...</div>
-                <div class="meeting-title-big" id="lockTitle">...</div>
+<body>
+    
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal">
+            <h2>Nova Reserva</h2>
+            <p>Selecione a duração da reunião agora</p>
+
+            <div class="duration-options">
+                <button class="duration-btn" onclick="selectDuration(15)">15 min</button>
+                <button class="duration-btn selected" onclick="selectDuration(30)">30 min</button>
+                <button class="duration-btn" onclick="selectDuration(60)">1h</button>
+                
             </div>
-            <div style="margin-top: 40px; font-size: 0.9rem; opacity: 0.7;">NÃO PERTURBE</div>
+
+            <input type="text" id="meetingTitle" class="input-title" placeholder="Título da Reunião (Opcional)">
+
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn btn-confirm" onclick="confirmBooking()">Confirmar Reserva</button>
+            </div>
         </div>
     </div>
 
     <div class="container">
-        <div class="modal-overlay" id="modalOverlay">
-            <div class="modal-card">
-                <h3 style="margin-bottom:20px; color:#333;">Nova Reserva</h3>
-                <div class="form-group"><label>Título</label><input type="text" id="inputTitle" placeholder="Ex: Daily TI"></div>
-                <div class="form-group"><label>Organizador</label><input type="text" id="inputOrganizer" placeholder="Nome"></div>
-                <div class="row">
-                    <div class="form-group"><label>Início (HH:MM)</label><input type="text" id="inputStart" placeholder="14:00" maxlength="5" oninput="formatTime(this)"></div>
-                    <div class="form-group"><label>Fim (HH:MM)</label><input type="text" id="inputEnd" placeholder="15:00" maxlength="5" oninput="formatTime(this)"></div>
-                </div>
-                <div class="modal-actions">
-                    <button class="btn-add" style="background:#ccc; color:black;" onclick="closeModal()">Cancelar</button>
-                    <button class="btn-add" onclick="saveReservation()">Confirmar</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="status-panel">
+        <div class="status-panel" id="sidebar">
             <img src="https://globalsrv.com.br/wp-content/uploads/2023/02/Logo_60px_white.png" alt="Logo" class="sidebar-logo">
+            
             <div class="room-info">
-                <h1>Sala Principal</h1>
-                <p>Sede</p>
+                <h1 id="mainStatus">SALA 01</h1>
+                <p id="subStatus">Sala Principal</p>
             </div>
+
             <div class="current-time">
                 <div class="clock" id="clock">00:00</div>
                 <div class="date" id="date">...</div>
@@ -192,215 +196,264 @@
         <div class="schedule-panel">
             <div class="schedule-header">
                 <h2>Agenda do Dia</h2>
-                <button class="btn-add" onclick="openModal()">+ Nova Reserva</button>
+                <div class="header-actions">
+                    <button class="btn btn-reservar" id="btnNovaReserva" onclick="openModal()">
+                        + Reservar
+                    </button>
+                    <a href="index.html" class="btn btn-voltar">Sair</a>
+                </div>
             </div>
-            <div id="reservation-list"></div> 
+            <div id="reservation-list">
+                <div style="color: #999; text-align: center; margin-top: 50px;">Carregando...</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // CONFIGURAÇÃO: Chave para salvar neste dispositivo
-        const STORAGE_KEY = 'meetings_sala1_local'; 
-
-        // Sistema de Áudio
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let lastAlertMinute = -1;
-
-        function playAlarm() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(440, audioCtx.currentTime); 
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime); 
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 30);
-            osc.connect(gain); gain.connect(audioCtx.destination); 
-            osc.start(); osc.stop(audioCtx.currentTime + 30);
-        }
-
-        // --- FUNÇÕES DE DADOS (LOCALSTORAGE) ---
-        
-        // 1. Inicializa (Cria dados falsos se estiver vazio)
-        function initData() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (!data) {
-                // Se não tem nada, cria um exemplo para o usuário ver que funciona
-                const example = [{ title: "Daily Obra (Exemplo)", organizer: "Equipe", start: "08:00", end: "09:00" }];
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(example));
-            }
-            loadMeetings();
-        }
-
-        // 2. Carrega e Desenha na Tela
-        function loadMeetings() {
-            const data = localStorage.getItem(STORAGE_KEY);
-            const list = document.getElementById('reservation-list');
-            list.innerHTML = ''; // Limpa tudo antes de desenhar
-            
-            if (data) {
-                const meetings = JSON.parse(data);
-                // Ordena por horário
-                meetings.sort((a, b) => a.start.localeCompare(b.start));
-                
-                meetings.forEach((m, index) => {
-                    // Usamos CRASES (backticks) para o template
-                    const html = `
-                    <div class="reservation-card" data-start="${m.start}" data-end="${m.end}">
-                        <div class="time-slot">${m.start} <span>até ${m.end}</span></div>
-                        <div class="meeting-details">
-                            <div class="meeting-title">${m.title}</div>
-                            <div class="organizer">
-                                <div class="avatar">${m.organizer.charAt(0)}</div> ${m.organizer}
-                            </div>
-                        </div>
-                        <span class="tag upcoming">CONFIRMADO</span>
-                        <button class="btn-delete" onclick="deleteMeeting(${index})">✕</button>
-                    </div>`;
-                    list.insertAdjacentHTML('beforeend', html);
-                });
-            }
-        }
-
-        // 3. Salva Nova Reunião
-        function saveReservation() {
-            const title = document.getElementById('inputTitle').value;
-            const org = document.getElementById('inputOrganizer').value;
-            const start = document.getElementById('inputStart').value;
-            const end = document.getElementById('inputEnd').value;
-
-            if(!title || !org || !start || !end) return alert("Preencha todos os campos!");
-
-            // Pega o que já tem
-            let meetings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-            // Adiciona o novo
-            meetings.push({ title, organizer: org, start, end });
-            // Salva de volta
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(meetings));
-
-            closeModal();
-            loadMeetings(); // Recarrega a lista visualmente
-            
-            // Força checagem de status imediata (para ativar vermelho se for AGORA)
-            const now = new Date();
-            checkStatus(String(now.getHours()), String(now.getMinutes()));
-        }
-
-        // 4. Deleta Reunião
-        function deleteMeeting(index) {
-            if(confirm("Excluir esta reunião?")) {
-                let meetings = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-                meetings.splice(index, 1);
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(meetings));
-                loadMeetings();
-                // Reseta status caso tenha excluído a reunião atual
-                toggleLockdownMode(false);
-            }
-        }
-
-        // --- RELÓGIO E STATUS ---
         function updateTime() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('clock').textContent = `${hours}:${minutes}`; // Crase obrigatoria aqui
-            const opts = { weekday: 'long', day: 'numeric', month: 'long' };
-            const dStr = now.toLocaleDateString('pt-BR', opts);
-            document.getElementById('date').textContent = dStr.charAt(0).toUpperCase() + dStr.slice(1);
-            
-            checkStatus(hours, minutes);
+            const elClock = document.getElementById('clock');
+            const elDate = document.getElementById('date');
+            if(elClock) elClock.textContent = `${hours}:${minutes}`;
+            if(elDate) {
+                const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+                const dStr = now.toLocaleDateString('pt-BR', opts);
+                elDate.textContent = dStr.charAt(0).toUpperCase() + dStr.slice(1);
+            }
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8crGl2xSoe8c0kRDA03CxRcsJtsH-Hz8",
+            authDomain: "painel-engenharia-e2b60.firebaseapp.com",
+            projectId: "painel-engenharia-e2b60",
+            storageBucket: "painel-engenharia-e2b60.firebasestorage.app",
+            messagingSenderId: "754848525033",
+            appId: "1:754848525033:web:10dc9a0eba7395fc069e78"
+        };
+
+        const ROOM_COLLECTION = "sala1"; 
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- VARIÁVEIS GLOBAIS ---
+        let roomIsBusy = false;
+        let inactivityTimer;
+        let selectedDuration = 30; // Padrão 30min
+
+        // --- LÓGICA DO MODAL ---
+        window.openModal = function() {
+            if(roomIsBusy) {
+                alert("Não é possível reservar agora: A sala está ocupada.");
+                return;
+            }
+            document.getElementById('bookingModal').style.display = 'flex';
+            // Reseta input
+            document.getElementById('meetingTitle').value = "";
         }
 
-        function checkStatus(h, m) {
-            const nowMins = (parseInt(h) * 60) + parseInt(m);
+        window.closeModal = function() {
+            document.getElementById('bookingModal').style.display = 'none';
+        }
+
+        window.selectDuration = function(mins) {
+            selectedDuration = mins;
+            // Atualiza visual dos botões
+            document.querySelectorAll('.duration-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        window.confirmBooking = async function() {
+            const titleInput = document.getElementById('meetingTitle').value;
+            const finalTitle = titleInput.trim() === "" ? "Reserva Tablet" : titleInput;
+
+            const now = new Date();
+            const end = new Date(now.getTime() + selectedDuration * 60000);
+
+            try {
+                closeModal(); // Fecha primeiro para dar feedback rápido
+                
+                await addDoc(collection(db, ROOM_COLLECTION), {
+                    titulo: finalTitle,
+                    inicio: now.toISOString(),
+                    fim: end.toISOString(),
+                    organizer: "Agendamento Local",
+                    criadoEm: new Date().toISOString()
+                });
+                // A tela atualizará sozinha via onSnapshot
+            } catch (error) {
+                console.error("Erro:", error);
+                alert("Erro ao realizar reserva.");
+            }
+        }
+
+        // --- INATIVIDADE ---
+        const resetTimer = () => {
+            clearTimeout(inactivityTimer);
+            if (roomIsBusy) return; // Se ocupado, não sai
+            // Se modal estiver aberto, não sai também (opcional, mas boa prática)
+            if (document.getElementById('bookingModal').style.display === 'flex') return;
+
+            inactivityTimer = setTimeout(() => {
+                window.location.href = "index.html";
+            }, 60000);
+        };
+
+        window.onload = resetTimer;
+        document.onmousemove = resetTimer;
+        document.onclick = resetTimer;
+        document.ontouchstart = resetTimer;
+
+
+        // --- FIREBASE LISTENER ---
+        function formatIsoTime(isoString) {
+            if (!isoString) return "--:--";
+            try {
+                const date = new Date(isoString);
+                if(isNaN(date.getTime())) return isoString; 
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${hours}:${minutes}`;
+            } catch (e) { return isoString; }
+        }
+
+        const q = query(collection(db, ROOM_COLLECTION), orderBy("inicio"));
+
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('reservation-list');
+            list.innerHTML = ""; 
+            const today = new Date();
+            let hasEventsToday = false;
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const rawStart = data.inicio || data.start;
+                const rawEnd = data.fim || data.end;
+                
+                if(!rawStart) return;
+                const eventDate = new Date(rawStart);
+                if (eventDate.toDateString() !== today.toDateString()) return;
+
+                hasEventsToday = true;
+
+                const titulo = data.titulo || data.title || "Sem Título";
+                const organizador = data.organizer || "Reservado"; 
+                const displayStart = formatIsoTime(rawStart);
+                const displayEnd = formatIsoTime(rawEnd);
+
+                const html = `
+                <div class="reservation-card" data-raw-start="${rawStart}" data-raw-end="${rawEnd}" data-title="${titulo}">
+                    <div class="time-slot">${displayStart} <span>até ${displayEnd}</span></div>
+                    <div class="meeting-details">
+                        <div class="meeting-title">${titulo}</div>
+                        <div class="organizer"><div class="avatar">${organizador ? organizador[0] : 'T'}</div>${organizador}</div>
+                    </div>
+                    <span class="tag upcoming">CONFIRMADO</span>
+                </div>`;
+                list.insertAdjacentHTML('beforeend', html);
+            });
+
+            if (!hasEventsToday) {
+                 list.innerHTML = '<div style="color: #999; text-align: center; margin-top: 50px;">Agenda livre por hoje.</div>';
+            }
+
+            checkStatus();
+        });
+
+        function checkStatus() {
+            const now = new Date();
             let isBusy = false;
             let currentTitle = "";
             let currentTime = "";
 
             const cards = document.querySelectorAll('.reservation-card');
-            
+
             cards.forEach(card => {
-                const startStr = card.getAttribute('data-start');
-                const endStr = card.getAttribute('data-end');
-                const title = card.querySelector('.meeting-title').innerText;
-                const tag = card.querySelector('.tag');
+                const rawStart = card.getAttribute('data-raw-start');
+                const rawEnd = card.getAttribute('data-raw-end');
+                const title = card.getAttribute('data-title');
 
-                const startMins = toMins(startStr);
-                const endMins = toMins(endStr);
+                if (rawStart && rawEnd) {
+                    const startDate = new Date(rawStart);
+                    const endDate = new Date(rawEnd);
+                    if(isNaN(startDate.getTime())) return;
 
-                if (nowMins >= startMins && nowMins < endMins) {
-                    isBusy = true;
-                    currentTitle = title;
-                    currentTime = `${startStr} - ${endStr}`;
-                    
-                    // Visual Card
-                    card.style.borderLeftColor = "var(--danger-red)";
-                    card.style.background = "#fff1f2";
-                    tag.className = "tag ongoing"; tag.textContent = "EM ANDAMENTO";
-                } 
-                else if (nowMins === endMins && lastAlertMinute !== nowMins) {
-                     playAlarm(); lastAlertMinute = nowMins;
-                }
-                else {
-                    card.style.borderLeftColor = "var(--primary-blue)";
-                    card.style.background = "white";
-                    if(nowMins >= endMins) {
-                        tag.className = "tag"; tag.textContent = "FINALIZADO"; 
-                        tag.style.background = "#f3f4f6"; tag.style.color="#9ca3af";
-                    } else {
-                        tag.className = "tag upcoming"; tag.textContent = "CONFIRMADO";
+                    const tag = card.querySelector('.tag');
+
+                    if (now >= startDate && now < endDate) {
+                        isBusy = true; 
+                        currentTitle = title;
+                        const s = String(startDate.getHours()).padStart(2,'0') + ":" + String(startDate.getMinutes()).padStart(2,'0');
+                        const e = String(endDate.getHours()).padStart(2,'0') + ":" + String(endDate.getMinutes()).padStart(2,'0');
+                        currentTime = `${s} - ${e}`;
+                        
+                        card.style.borderLeftColor = "var(--danger-red)";
+                        card.style.background = "#fff1f2";
+                        card.classList.add('active-card');
+                        if(tag) { tag.className = "tag ongoing"; tag.textContent = "EM ANDAMENTO"; }
+                    }
+                    else {
+                        card.style.borderLeftColor = "var(--primary-blue)";
+                        card.style.background = "white";
+                        card.classList.remove('active-card');
+                        if(tag) {
+                            if (now >= endDate) {
+                                tag.className = "tag"; tag.textContent = "FINALIZADO";
+                                tag.style.background = "#f3f4f6"; tag.style.color = "#9ca3af";
+                            } else {
+                                tag.className = "tag upcoming"; tag.textContent = "CONFIRMADO";
+                            }
+                        }
                     }
                 }
             });
 
-            toggleLockdownMode(isBusy, currentTitle, currentTime);
+            roomIsBusy = isBusy;
+            
+            // Gerencia o estado do botão "Nova Reserva"
+            const btnReserva = document.getElementById('btnNovaReserva');
+            if(roomIsBusy) {
+                btnReserva.disabled = true;
+                btnReserva.innerHTML = "⛔ Ocupado";
+            } else {
+                btnReserva.disabled = false;
+                btnReserva.innerHTML = "+ Reservar";
+            }
+
+            resetTimer(); 
+            toggleHybridMode(isBusy, currentTitle, currentTime);
         }
 
-        function toggleLockdownMode(active, title, time) {
+        function toggleHybridMode(active, title, time) {
             const body = document.body;
+            const mainStatus = document.getElementById('mainStatus');
+            const subStatus = document.getElementById('subStatus');
+
             if (active) {
-                body.classList.add('is-busy');
-                document.getElementById('lockTitle').textContent = title;
-                document.getElementById('lockTime').textContent = time;
+                if (!body.classList.contains('is-busy')) body.classList.add('is-busy');
+                mainStatus.textContent = "OCUPADO";
+                mainStatus.classList.add('status-ocupado');
+                subStatus.innerHTML = `${title}<br><span style="font-size:0.8em; opacity:0.8; font-weight:400">Termina às ${time.split('-')[1]}</span>`;
+                subStatus.classList.add('meeting-now');
+
             } else {
                 body.classList.remove('is-busy');
+                mainStatus.textContent = "SALA 01";
+                mainStatus.classList.remove('status-ocupado');
+                subStatus.textContent = "Sala Principal";
+                subStatus.classList.remove('meeting-now');
             }
         }
-
-        // Helpers
-        function toMins(timeStr) {
-            const [hh, mm] = timeStr.split(':');
-            return (parseInt(hh)*60) + parseInt(mm);
-        }
-
-        function openModal() { document.getElementById('modalOverlay').classList.add('active'); if(audioCtx.state === 'suspended') audioCtx.resume(); }
-        function closeModal() { document.getElementById('modalOverlay').classList.remove('active'); }
         
-        // Máscara para forçar HH:MM e evitar erro de AM/PM
-        function formatTime(input) {
-            let v = input.value.replace(/\D/g, '');
-            if (v.length > 4) v = v.slice(0, 4);
-            if (v.length > 2) v = v.slice(0, 2) + ':' + v.slice(2);
-            input.value = v;
-        }
-
-        // INATIVIDADE INTELIGENTE
-        let idleTime = 0;
-        const idleLimit = 60; 
-
-        function resetTimer() { idleTime = 0; }
-        document.onload = resetTimer; document.onmousemove = resetTimer; document.onclick = resetTimer; document.onkeypress = resetTimer;
-
-        setInterval(function() {
-            idleTime++;
-            if (idleTime >= idleLimit) {
-                const isRoomBusy = document.body.classList.contains('is-busy');
-                if (!isRoomBusy) { window.location.href = "index.html"; }
-            }
-        }, 1000);
-
-        // Inicializa o sistema
-        initData();
-        setInterval(updateTime, 1000);
-        updateTime();
+        setInterval(checkStatus, 5000);
     </script>
 </body>
 </html>
