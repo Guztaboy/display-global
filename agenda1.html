@@ -256,7 +256,6 @@
                 return;
             }
             document.getElementById('bookingModal').style.display = 'flex';
-            // Reseta input
             document.getElementById('meetingTitle').value = "";
         }
 
@@ -266,7 +265,6 @@
 
         window.selectDuration = function(mins) {
             selectedDuration = mins;
-            // Atualiza visual dos botões
             document.querySelectorAll('.duration-btn').forEach(btn => btn.classList.remove('selected'));
             event.target.classList.add('selected');
         }
@@ -279,8 +277,7 @@
             const end = new Date(now.getTime() + selectedDuration * 60000);
 
             try {
-                closeModal(); // Fecha primeiro para dar feedback rápido
-                
+                closeModal();
                 await addDoc(collection(db, ROOM_COLLECTION), {
                     titulo: finalTitle,
                     inicio: now.toISOString(),
@@ -288,7 +285,6 @@
                     organizer: "Agendamento Local",
                     criadoEm: new Date().toISOString()
                 });
-                // A tela atualizará sozinha via onSnapshot
             } catch (error) {
                 console.error("Erro:", error);
                 alert("Erro ao realizar reserva.");
@@ -298,8 +294,7 @@
         // --- INATIVIDADE ---
         const resetTimer = () => {
             clearTimeout(inactivityTimer);
-            if (roomIsBusy) return; // Se ocupado, não sai
-            // Se modal estiver aberto, não sai também (opcional, mas boa prática)
+            if (roomIsBusy) return;
             if (document.getElementById('bookingModal').style.display === 'flex') return;
 
             inactivityTimer = setTimeout(() => {
@@ -313,7 +308,7 @@
         document.ontouchstart = resetTimer;
 
 
-        // --- FIREBASE LISTENER ---
+        // --- FIREBASE LISTENER COM LOGS TÉCNICOS ---
         function formatIsoTime(isoString) {
             if (!isoString) return "--:--";
             try {
@@ -329,18 +324,39 @@
 
         onSnapshot(q, (snapshot) => {
             const list = document.getElementById('reservation-list');
+            
+            // LOGS DE DEBUG
+            console.log("=== DEBUG FIREBASE ===");
+            console.log("Total de documentos no snapshot:", snapshot.size);
+            
+            if (snapshot.empty) {
+                console.warn("Aviso: A coleção '" + ROOM_COLLECTION + "' está vazia.");
+            }
+
             list.innerHTML = ""; 
             const today = new Date();
             let hasEventsToday = false;
 
             snapshot.forEach((doc) => {
                 const data = doc.data();
+                console.log("Documento ID:", doc.id, "Conteúdo:", data);
+
                 const rawStart = data.inicio || data.start;
                 const rawEnd = data.fim || data.end;
                 
-                if(!rawStart) return;
+                if(!rawStart) {
+                    console.error("Erro: Documento " + doc.id + " sem campo de início.");
+                    return;
+                }
+
                 const eventDate = new Date(rawStart);
-                if (eventDate.toDateString() !== today.toDateString()) return;
+                console.log(`Comparando: Evento(${eventDate.toDateString()}) vs Hoje(${today.toDateString()})`);
+
+                // Filtro para mostrar apenas eventos de hoje
+                if (eventDate.toDateString() !== today.toDateString()) {
+                    console.log("Documento ignorado: Não é de hoje.");
+                    return;
+                }
 
                 hasEventsToday = true;
 
@@ -362,6 +378,7 @@
             });
 
             if (!hasEventsToday) {
+                 console.log("Nenhum evento para hoje encontrado após o filtro.");
                  list.innerHTML = '<div style="color: #999; text-align: center; margin-top: 50px;">Agenda livre por hoje.</div>';
             }
 
@@ -417,8 +434,6 @@
             });
 
             roomIsBusy = isBusy;
-            
-            // Gerencia o estado do botão "Nova Reserva"
             const btnReserva = document.getElementById('btnNovaReserva');
             if(roomIsBusy) {
                 btnReserva.disabled = true;
