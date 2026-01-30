@@ -154,12 +154,12 @@
         <div class="carousel-track">
             <div class="partner-logo"><img src="https://aemassets.grupoccr.com.br/content/dam/sites-modulares/pt/media/images/logos/motiva_logo_only.svg" alt="CCR"></div>
             <div class="partner-logo"><img src="https://s.latamairlines.com/images/header/logo/DesktopNegative.svg" alt="Latam"></div>
-            <div class="partner-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.png" alt="Microsoft"></div>
+            <div class="partner-logo"><img src="https://csinfra.com.br/wp-content/uploads/2024/05/logo-csinfra-cinza.svg" alt="Microsoft"></div>
             <div class="partner-logo"><img src="https://www.metrocptm.com.br/wp-content/uploads/2025/09/trivia-trens-logo-oficial-reproducao.jpeg.png" alt="Metro"></div>
 
             <div class="partner-logo"><img src="https://aemassets.grupoccr.com.br/content/dam/sites-modulares/pt/media/images/logos/motiva_logo_only.svg" alt="CCR"></div>
             <div class="partner-logo"><img src="https://s.latamairlines.com/images/header/logo/DesktopNegative.svg" alt="Latam"></div>
-            <div class="partner-logo"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Microsoft_logo.svg/2048px-Microsoft_logo.svg.png" alt="Microsoft"></div>
+            <div class="partner-logo"><img src="https://csinfra.com.br/wp-content/uploads/2024/05/logo-csinfra-cinza.svg" alt="Microsoft"></div>
             <div class="partner-logo"><img src="https://www.metrocptm.com.br/wp-content/uploads/2025/09/trivia-trens-logo-oficial-reproducao.jpeg.png" alt="Metro"></div>
         </div>
     </div>
@@ -181,5 +181,76 @@
             }, 400);
         }
     </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA8crGl2xSoe8c0kRDA03CxRcsJtsH-Hz8",
+            authDomain: "painel-engenharia-e2b60.firebaseapp.com",
+            projectId: "painel-engenharia-e2b60",
+            storageBucket: "painel-engenharia-e2b60.firebasestorage.app",
+            messagingSenderId: "754848525033",
+            appId: "1:754848525033:web:10dc9a0eba7395fc069e78"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        const ROOM_COLLECTION = "sala1"; 
+        const AGENDA_PAGE = "agenda1.html"; 
+
+        // Cache para guardar os horários das reuniões
+        let meetingsCache = [];
+
+        // 1. OUVINTE DO FIREBASE (Carrega dados e converte fuso automaticamente)
+        const q = query(collection(db, ROOM_COLLECTION));
+
+        onSnapshot(q, (snapshot) => {
+            meetingsCache = [];
+            console.log("--- Atualização do Firebase recebida ---");
+            
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.inicio && data.fim) {
+                    // O JavaScript faz a conversão automática do 'Z' para o horário local aqui
+                    const startDate = new Date(data.inicio);
+                    const endDate = new Date(data.fim);
+                    
+                    meetingsCache.push({ start: startDate, end: endDate });
+                    
+                    // Log para você conferir se a conversão ficou certa no console
+                    console.log(`Reunião carregada: ${startDate.toLocaleTimeString()} até ${endDate.toLocaleTimeString()}`);
+                }
+            });
+            
+            // Verifica imediatamente ao carregar
+            checkTime();
+        });
+
+        // 2. VERIFICADOR DE TEMPO (Roda a cada 3 segundos)
+        function checkTime() {
+            const now = new Date(); // Horário atual do tablet
+            let shouldRedirect = false;
+
+            meetingsCache.forEach(meeting => {
+                // Compara o AGORA com os horários já convertidos
+                if (now >= meeting.start && now < meeting.end) {
+                    console.log(`REDIRECIONANDO! Agora (${now.toLocaleTimeString()}) está dentro de uma reunião.`);
+                    shouldRedirect = true;
+                }
+            });
+
+            if (shouldRedirect) {
+                window.location.href = AGENDA_PAGE;
+            }
+        }
+
+        // Mantém o sistema "vivo" checando o relógio
+        setInterval(checkTime, 3000);
+
+    </script>
+    
 </body>
 </html>
