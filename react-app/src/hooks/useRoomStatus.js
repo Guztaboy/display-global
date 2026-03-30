@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
+import { collection, query, onSnapshot } from "firebase/firestore";
 import { db, ROOM_COLLECTION } from "../config/firebase";
 
 /**
@@ -18,10 +18,7 @@ export function useRoomStatus() {
 
   // Listen to Firestore
   useEffect(() => {
-    const q = query(
-      collection(db, ROOM_COLLECTION),
-      orderBy("inicio")
-    );
+    const q = query(collection(db, ROOM_COLLECTION));
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const today = new Date();
@@ -48,6 +45,9 @@ export function useRoomStatus() {
           rawEnd,
         });
       });
+
+      // Sort by start time client-side
+      parsed.sort((a, b) => a.start - b.start);
 
       setMeetings(parsed);
     });
