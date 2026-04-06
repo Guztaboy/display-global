@@ -7,7 +7,6 @@ import StatusBadge from "../components/StatusBadge";
 import ClockDisplay from "../components/ClockDisplay";
 import MeetingCard from "../components/MeetingCard";
 import BookingModal from "../components/BookingModal";
-import CountdownTimer from "../components/CountdownTimer";
 
 import { useRoomStatus } from "../hooks/useRoomStatus";
 
@@ -24,24 +23,24 @@ export default function RoomDashboard() {
   // Theme based on status
   const theme = isBusy
     ? {
-      panelBg: "linear-gradient(180deg, #450a0a 0%, #1a0505 100%)",
+      panelBg: "#2C414A",
       panelGlow: "radial-gradient(circle, rgba(239,68,68,0.1) 0%, transparent 70%)",
-      containerBorder: "rgba(239,68,68,0.2)",
-      containerShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 80px rgba(239,68,68,0.15)",
-      rightBg: "linear-gradient(180deg, #1a0505 0%, #0f0000 100%)",
-      headerBorder: "rgba(239,68,68,0.1)",
+      containerBorder: "rgba(255,255,255,0.05)",
+      containerShadow: "0 24px 64px rgba(0,0,0,0.4)",
+      rightBg: "#344b55",
+      headerBorder: "rgba(255,255,255,0.06)",
       lockStatus: "busy",
-      bgGradient: "linear-gradient(135deg, #450a0a 0%, #1a0505 50%, #2d0a0a 100%)",
+      bgGradient: "#6E7171",
     }
     : {
-      panelBg: "linear-gradient(180deg, #0c2840 0%, #071929 100%)",
+      panelBg: "#2C414A",
       panelGlow: "radial-gradient(circle, rgba(14,165,233,0.1) 0%, transparent 70%)",
-      containerBorder: "rgba(14,165,233,0.15)",
-      containerShadow: "0 20px 60px rgba(0,0,0,0.4), 0 0 60px rgba(14,165,233,0.08)",
-      rightBg: "linear-gradient(180deg, #0a1929 0%, #06111d 100%)",
-      headerBorder: "rgba(14,165,233,0.1)",
+      containerBorder: "rgba(255,255,255,0.05)",
+      containerShadow: "0 24px 64px rgba(0,0,0,0.4)",
+      rightBg: "#344b55",
+      headerBorder: "rgba(255,255,255,0.06)",
       lockStatus: "free",
-      bgGradient: "linear-gradient(135deg, #0c2840 0%, #0f172a 50%, #071929 100%)",
+      bgGradient: "#6E7171",
     };
 
   // Derive card statuses
@@ -199,7 +198,7 @@ export default function RoomDashboard() {
                 style={{
                   fontSize: "2.2rem",
                   fontWeight: 900,
-                  color: "#f8fafc",
+                  color: "#ffffff",
                   letterSpacing: "-1px",
                   lineHeight: 1,
                 }}
@@ -220,37 +219,7 @@ export default function RoomDashboard() {
               </motion.p>
             </div>
 
-            {/* Countdown when busy */}
-            {isBusy && currentMeeting?.end && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                style={{
-                  textAlign: "center",
-                  background: "rgba(0,0,0,0.3)",
-                  border: "1px solid rgba(239,68,68,0.2)",
-                  borderRadius: 16,
-                  padding: "12px 20px",
-                  zIndex: 2,
-                  width: "100%",
-                  flexShrink: 0,
-                }}
-              >
-                <div
-                  style={{
-                    fontSize: "0.65rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "2px",
-                    color: "rgba(255,255,255,0.4)",
-                    marginBottom: 10,
-                  }}
-                >
-                  Termina em
-                </div>
-                <CountdownTimer endTime={currentMeeting.end} />
-              </motion.div>
-            )}
+            {/* Countdown removed per user request */}
           </div>
 
           {/* Clock */}
@@ -287,7 +256,7 @@ export default function RoomDashboard() {
                 style={{
                   fontSize: "1.5rem",
                   fontWeight: 700,
-                  color: "#f1f5f9",
+                  color: "#ffffff",
                   letterSpacing: "-0.5px",
                 }}
               >

@@ -14,7 +14,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
   const statusConfig = {
     ongoing: {
       border: "#ef4444",
-      bg: "rgba(239, 68, 68, 0.06)",
+      bg: "rgba(255, 255, 255, 0.05)",
       tagBg: "rgba(239, 68, 68, 0.1)",
       tagColor: "#ef4444",
       tagText: "EM ANDAMENTO",
@@ -22,7 +22,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
     },
     upcoming: {
       border: "#3b82f6",
-      bg: "rgba(59, 130, 246, 0.03)",
+      bg: "rgba(255, 255, 255, 0.05)",
       tagBg: "rgba(59, 130, 246, 0.08)",
       tagColor: "#3b82f6",
       tagText: "CONFIRMADO",
@@ -30,7 +30,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
     },
     finished: {
       border: "#475569",
-      bg: "rgba(71, 85, 105, 0.03)",
+      bg: "rgba(255, 255, 255, 0.05)",
       tagBg: "rgba(71, 85, 105, 0.08)",
       tagColor: "#64748b",
       tagText: "FINALIZADO",
@@ -96,7 +96,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
           style={{
             fontSize: "1.05rem",
             fontWeight: 700,
-            color: "#f1f5f9",
+            color: "#ffffff",
             marginBottom: 4,
           }}
         >
@@ -108,7 +108,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
             alignItems: "center",
             gap: 8,
             fontSize: "0.85rem",
-            color: "#94a3b8",
+            color: "rgba(255, 255, 255, 0.6)",
             fontWeight: 500,
           }}
         >
@@ -123,7 +123,7 @@ export default function MeetingCard({ meeting, cardStatus = "upcoming", index = 
               justifyContent: "center",
             }}
           >
-            <User size={12} color="#94a3b8" />
+            <User size={12} color="rgba(255, 255, 255, 0.6)" />
           </div>
           {meeting.organizer}
         </div>

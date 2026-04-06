@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { ShieldAlert } from "lucide-react";
 import LockRing from "../components/LockRing";
-import CountdownTimer from "../components/CountdownTimer";
 
 /**
  * Lockdown — Full-screen "LOCKED" overlay when the room is busy.
@@ -165,26 +164,7 @@ export default function Lockdown({ meeting }) {
             {meeting.title}
           </div>
 
-          {/* Countdown */}
-          <div
-            style={{
-              borderTop: "1px solid rgba(255,255,255,0.1)",
-              paddingTop: 20,
-            }}
-          >
-            <div
-              style={{
-                fontSize: "0.7rem",
-                textTransform: "uppercase",
-                letterSpacing: "3px",
-                color: "rgba(255,255,255,0.4)",
-                marginBottom: 12,
-              }}
-            >
-              Tempo Restante
-            </div>
-            <CountdownTimer endTime={meeting.end} />
-          </div>
+          {/* Countdown removed per user request */}
         </motion.div>
 
         {/* Do not disturb */}

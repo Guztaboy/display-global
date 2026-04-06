@@ -17,7 +17,7 @@ export default function ClockDisplay({ variant = "light" }) {
           fontWeight: 200,
           letterSpacing: "-3px",
           lineHeight: 1,
-          color: isDark ? "#f8fafc" : "#f8fafc",
+          color: "#ffffff",
           fontVariantNumeric: "tabular-nums",
         }}
       >
@@ -26,7 +26,7 @@ export default function ClockDisplay({ variant = "light" }) {
       <div
         style={{
           fontSize: "1rem",
-          color: isDark ? "#94a3b8" : "rgba(255,255,255,0.7)",
+          color: "rgba(255, 255, 255, 0.7)",
           marginTop: 6,
           fontWeight: 400,
           letterSpacing: "0.5px",

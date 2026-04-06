@@ -8,24 +8,24 @@ export default function StatusBadge({ status = "idle" }) {
   const config = {
     free: {
       label: "LIVRE",
-      bg: "rgba(14, 165, 233, 0.1)",
-      border: "rgba(14, 165, 233, 0.35)",
+      bg: "rgba(255, 255, 255, 0.05)",
+      border: "rgba(14, 165, 233, 0.3)",
       color: "#7dd3fc",
       dot: "#0ea5e9",
     },
     busy: {
       label: "OCUPADO",
-      bg: "rgba(239, 68, 68, 0.12)",
+      bg: "rgba(255, 255, 255, 0.05)",
       border: "rgba(239, 68, 68, 0.3)",
       color: "#fca5a5",
       dot: "#ef4444",
     },
     idle: {
       label: "SALA 01",
-      bg: "rgba(100, 116, 139, 0.1)",
-      border: "rgba(100, 116, 139, 0.2)",
-      color: "#94a3b8",
-      dot: "#64748b",
+      bg: "rgba(255, 255, 255, 0.05)",
+      border: "rgba(255, 255, 255, 0.1)",
+      color: "rgba(255, 255, 255, 0.7)",
+      dot: "rgba(255, 255, 255, 0.5)",
     },
   };
 
